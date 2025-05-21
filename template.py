@@ -1,11 +1,48 @@
 import math
 
+'''
+punish pointless steering
+#punish going off the track
+#punish slowing down for no reason
+#reward high speed according to the distance between the heading vector and the next checkpoint
+#reward keeping the opposite lane of the next curve (while not on currently on a curve)
+#reward steering smoothly
+'''
+#rewarding behaviour based on clossest waypoints===============================================================================
 def reward_function(params):
-    ###############################################################################
-    '''
-    Example of using waypoints and heading to make the car point in the right direction
-    '''
+    # Read input parameters
+    closest_waypoints = params['closest_waypoints']
+    all_wheels_on_track = params['all_wheels_on_track']
+    is_offtrack = params['is_offtrack']
+    is_reversed = params['is_reversed']
+    steering_angle = params['steering_angle']
+    speed = params['speed']
+    
+    #initialize reward
+    reward = 1.0
 
+    #punish going off track, or going backwards
+    if not all_wheels_on_track:
+        reward *= 0.01
+    if is_offtrack:
+        reward *= 0.001
+    if is_reversed:
+        reward *= 0.001
+
+    #reward smooth steering
+    
+
+    #reward going straight in section 44-50
+    if closest_waypoints[0] in [44,45,46,47,48,49,50]:
+        reward += 1 - (abs(steering_angle)/100)
+    #reward speeding in section 43-48
+    if closest_waypoints[0] in [43, 44,45,46,47,48]:
+        reward += speed/100
+    
+    return float(reward)
+
+#going from checkpoing to checkpoint default example======================================================================================
+def example_reward_function(params):
     # Read input variables
     waypoints = params['waypoints']
     closest_waypoints = params['closest_waypoints']
