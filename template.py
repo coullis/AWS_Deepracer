@@ -17,28 +17,40 @@ def reward_function(params):
     is_reversed = params['is_reversed']
     steering_angle = params['steering_angle']
     speed = params['speed']
+    is_left_of_center = params['is_left_of_center']
     
     #initialize reward
     reward = 1.0
 
     #punish going off track, or going backwards
     if not all_wheels_on_track:
-        reward *= 0.01
+        reward *= 0.1
     if is_offtrack:
-        reward *= 0.001
+        return 0.001
     if is_reversed:
-        reward *= 0.001
+        return 0.001
 
     #reward smooth steering
-    
+    if abs(steering_angle) < 10:
+        reward += 0.5  
+    elif abs(steering_angle) < 20:
+        reward += 0.2  
+    else:
+        reward *= 0.9
 
-    #reward going straight in section 44-50
-    if closest_waypoints[0] in [44,45,46,47,48,49,50]:
-        reward += 1 - (abs(steering_angle)/100)
-    #reward speeding in section 43-48
-    if closest_waypoints[0] in [43, 44,45,46,47,48]:
-        reward += speed/100
-    
+    #reward going straight in straight sectors
+    if closest_waypoints[0] in [1,2,3,4,5,6,7,8,9,10,11,12,30,31,32,33,44,45,46,47,48,49,50]:
+        reward += (30 - abs(steering_angle))/30
+    #reward speeding in straight sectors
+    if closest_waypoints[0] in [1,2,3,4,5,6,7,8,9,10,11,12,22,23,24,25,30,31,32,36,37,38,43,44,45,46,47,48,54,55,56]:
+        reward += speed/10
+    #reward staying on the right lane before a left turn
+    if closest_waypoints[0] in [4,5,6,7,8,9,10,11,12,13,14,26,27,28,29,30,31,32,33,45,46,47,48,49,50] and not is_left_of_center:
+        reward += 0.5
+    #reward staying on the left lane before a right turn
+    if closest_waypoints[0] in [17,18,19,20,21,22,23,35,36,37,38,39,40,41,42,43] and is_left_of_center:
+        reward += 0.5
+
     return float(reward)
 
 #going from checkpoing to checkpoint default example======================================================================================
